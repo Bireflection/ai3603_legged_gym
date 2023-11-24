@@ -61,8 +61,8 @@ class GO1RoughCfg( LeggedRobotCfg ):
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 4
 
-    class terrain( LeggedRobotCfg.terrain ):
-        mesh_type = 'plane'
+    # class terrain( LeggedRobotCfg.terrain ):
+    #     mesh_type = 'plane'
 
     class asset( LeggedRobotCfg.asset ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/go1/urdf/go1.urdf'
