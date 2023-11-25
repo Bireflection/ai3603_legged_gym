@@ -37,7 +37,7 @@ from legged_gym.utils import  get_args, export_policy_as_jit, task_registry, Log
 
 import numpy as np
 import torch
-
+import math
 
 def play(args):
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
@@ -85,6 +85,11 @@ def play(args):
         if MOVE_CAMERA:
             camera_position += camera_vel * env.dt
             env.set_camera(camera_position, camera_position + camera_direction)
+        # only for task 1
+        command_vel = math.sqrt((env.commands[robot_index, 0].item()) ** 2 + env.commands[robot_index, 1].item() ** 2)
+        base_vel = math.sqrt((env.base_lin_vel[robot_index, 0].item()) ** 2 + env.base_lin_vel[robot_index, 1].item() ** 2)
+        accuracy = math.exp(- ((command_vel - base_vel) ** 2))
+        infos["episode"]["accuracy"] = accuracy
 
         if i < stop_state_log:
             logger.log_states(
