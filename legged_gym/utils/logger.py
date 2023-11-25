@@ -50,8 +50,10 @@ class Logger:
 
     def log_rewards(self, dict, num_episodes):
         for key, value in dict.items():
-            if 'rew' in key or 'accuracy' in key:
+            if 'rew' in key:
                 self.rew_log[key].append(value.item() * num_episodes)
+            if 'accuracy' in key:
+                print("accuracy:{}".format(value))
         self.num_episodes += num_episodes
 
     def reset(self):
