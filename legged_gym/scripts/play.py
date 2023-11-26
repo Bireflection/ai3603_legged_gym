@@ -85,16 +85,21 @@ def play(args):
         if MOVE_CAMERA:
             camera_position += camera_vel * env.dt
             env.set_camera(camera_position, camera_position + camera_direction)
+        if args.accuracy is not None and args.accuracy == True:
         # only for task 1
-        command_vel = math.sqrt((env.commands[robot_index, 0].item()) ** 2 + env.commands[robot_index, 1].item() ** 2)
-        base_vel = math.sqrt((env.base_lin_vel[robot_index, 0].item()) ** 2 + env.base_lin_vel[robot_index, 1].item() ** 2)
-        accuracy = math.exp(- ((command_vel - base_vel) ** 2))
-        infos["episode"]["accuracy"] = accuracy
+            command_vel = math.sqrt((env.commands[robot_index, 0].item()) ** 2 + env.commands[robot_index, 1].item() ** 2)
+            base_vel = math.sqrt((env.base_lin_vel[robot_index, 0].item()) ** 2 + env.base_lin_vel[robot_index, 1].item() ** 2)
+            accuracy = math.exp(- ((command_vel - base_vel) ** 2))
+            infos["episode"]["accuracy"] = accuracy
         # task 2 3
-        agility = 1
-        infos["episode"]["agility"] = agility
-        stability = 1
-        infos["episode"]["stability"] = stability
+        if args.agility is not None and args.agility == True:
+            command_vel = env.commands[robot_index, 0].item()
+            base_vel = env.base_lin_vel[robot_index, 0].item()
+            agility = math.exp(-0.25 * max(command_vel - base_vel), 0)
+            infos["episode"]["agility"] = agility
+        if args.stability is not None and args.stability == True:
+            stability = math.exp(1 - 1)
+            infos["episode"]["stability"] = stability
         if i < stop_state_log:
             logger.log_states(
                 {

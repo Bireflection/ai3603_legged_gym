@@ -52,8 +52,8 @@ class Logger:
         for key, value in dict.items():
             if 'rew' in key:
                 self.rew_log[key].append(value.item() * num_episodes)
-            if 'accuracy' in key:
-                print("accuracy:{}".format(value))
+            if 'accuracy' in key or 'agility' in key or 'stability' in key:
+                self.rew_log[key].append(value * num_episodes)
         self.num_episodes += num_episodes
 
     def reset(self):
