@@ -95,7 +95,7 @@ def play(args):
         if args.agility is not None and args.agility == True:
             command_vel = env.commands[robot_index, 0].item()
             base_vel = env.base_lin_vel[robot_index, 0].item()
-            agility = math.exp(-0.25 * max(command_vel - base_vel), 0)
+            agility = math.exp(-0.25 * max(command_vel - base_vel, 0))
             infos["episode"]["agility"] = agility
         if args.stability is not None and args.stability == True:
             stability = math.exp(1 - 1)

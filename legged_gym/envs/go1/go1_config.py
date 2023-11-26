@@ -74,11 +74,15 @@ class GO1RoughCfg( LeggedRobotCfg ):
     class rewards( LeggedRobotCfg.rewards ):
         soft_dof_pos_limit = 0.9
         base_height_target = 0.25
+        tracking_lin_vel = 2.0
+        tracking_ang_vel = 0.8
         class scales( LeggedRobotCfg.rewards.scales ):
             torques = -0.0002
             dof_pos_limits = -10.0
 
 class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
+    class policy( LeggedRobotCfgPPO.policy ):
+        activation = 'elu'
     class algorithm( LeggedRobotCfgPPO.algorithm ):
         entropy_coef = 0.01
     class runner( LeggedRobotCfgPPO.runner ):

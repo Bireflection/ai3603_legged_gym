@@ -133,9 +133,11 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
         if args.accuracy is not None and args.accuracy == True:
             env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
             env_cfg.commands.ranges.lin_vel_y = [-1.0, 1.0]
+            env_cfg.env.episode_length_s = 3
         if args.agility is not None and args.agility == True:
             env_cfg.commands.ranges.lin_vel_x = [5.0, 5.0]
             env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
+            env_cfg.env.episode_length_s = 1
         if args.stability is not None and args.stability == True:
             env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
             env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
@@ -175,7 +177,7 @@ def get_args():
         {"name": "--max_iterations", "type": int, "help": "Maximum number of training iterations. Overrides config file if provided."},
 
 
-        {"name": "--accuracy", "action": "store_true", "default": True, "help": "Options for testing accuracy"},
+        {"name": "--accuracy", "action": "store_true", "default": False, "help": "Options for testing accuracy"},
         {"name": "--agility", "action": "store_true", "default": False, "help": "Options for testing agility"},
         {"name": "--stability", "action": "store_true", "default": False, "help": "Options for testing stability"},
     ]

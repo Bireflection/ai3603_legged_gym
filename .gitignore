@@ -53,6 +53,7 @@ Thumbs.db
 # logs
 logs
 runs
+Backup
 
 # other
 *.egg-info
