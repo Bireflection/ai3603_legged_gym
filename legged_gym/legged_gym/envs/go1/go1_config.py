@@ -74,26 +74,30 @@ class GO1RoughCfg( LeggedRobotCfg ):
     class rewards( LeggedRobotCfg.rewards ):
         soft_dof_pos_limit = 0.9
         base_height_target = 0.25
-        tracking_sigma = 0.15  # 减小以提高准确性
+        tracking_sigma = 0.25  # 减小以提高准确性
         class scales( LeggedRobotCfg.rewards.scales ):
-            tracking_lin_vel = 1.0  # 增加以提高准确性和敏捷性
-            tracking_ang_vel = 0.5  # 增加以提高准确性
-            lin_vel_z = -1.0  # 减少以提高稳定性
+            tracking_lin_vel = 2.0  # 增加以提高准确性和敏捷性
+            tracking_ang_vel = 0.9  # 增加以提高准确性
+            lin_vel_z = -4  # 减少以提高稳定性
             ang_vel_xy = -0.025  # 减少以提高稳定性
             orientation = -0.5  # 增加以提高稳定性
-            dof_vel = -0.0  # 考虑减少以提高敏捷性
-            dof_acc = -1e-7  # 考虑减少以提高敏捷性
-            feet_air_time =  1.5  # 增加以提高稳定性 
-            torques = -0.0002
+            torques = -2.5e-5
+            dof_acc = -1.25e-7
+            # feet_air_time = 
             dof_pos_limits = -10.0
 
 class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
     class policy( LeggedRobotCfgPPO.policy ):
         activation = 'elu'
+        # rnn_type = 'gru'
+        # rnn_hidden_size = 512
+        # rnn_num_layers = 1
     class algorithm( LeggedRobotCfgPPO.algorithm ):
         entropy_coef = 0.01
     class runner( LeggedRobotCfgPPO.runner ):
+        # policy_class_name = 'ActorCriticRecurrent'
         run_name = ''
         experiment_name = 'go1'
+        # max_iterations = 5000
 
   

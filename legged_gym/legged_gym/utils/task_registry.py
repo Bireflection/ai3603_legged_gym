@@ -62,6 +62,14 @@ class TaskRegistry():
         env_cfg.seed = train_cfg.seed
         return env_cfg, train_cfg
     
+    def update_scale(self, env_cfg, args):
+        if args.tracking_lin_vel is not None:
+            env_cfg.rewards.scales.tracking_lin_vel = args.tracking_lin_vel
+        if args.tracking_ang_vel is not None:
+            env_cfg.rewards.scales.tracking_ang_vel = args.tracking_ang_vel
+        if args.tracking_sigma is not None:
+            env_cfg.rewards.tracking_sigma = args.tracking_sigma
+
     def make_env(self, name, args=None, env_cfg=None) -> Tuple[VecEnv, LeggedRobotCfg]:
         """ Creates an environment either from a registered namme or from the provided config file.
 
@@ -90,6 +98,7 @@ class TaskRegistry():
             env_cfg, _ = self.get_cfgs(name)
         # override cfg from args (if specified)
         env_cfg, _ = update_cfg_from_args(env_cfg, None, args)
+        self.update_scale(env_cfg=env_cfg,args=args)
         set_seed(env_cfg.seed)
         # parse sim params (convert to dict first)
         sim_params = {"sim": class_to_dict(env_cfg.sim)}
@@ -134,6 +143,8 @@ class TaskRegistry():
                 print(f"'train_cfg' provided -> Ignoring 'name={name}'")
         # override cfg from args (if specified)
         _, train_cfg = update_cfg_from_args(None, train_cfg, args)
+
+        
 
         if log_root=="default":
             log_root = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name)

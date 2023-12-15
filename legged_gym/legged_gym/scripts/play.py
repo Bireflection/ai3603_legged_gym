@@ -74,6 +74,8 @@ def play(args):
     camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
     img_idx = 0
 
+    current_vel_y = torch.zeros(env_cfg.env.num_envs,device="cuda:0")
+    current_vel_yaw = torch.zeros(env_cfg.env.num_envs,device="cuda:0")
     for i in range(10*int(env.max_episode_length)):
         actions = policy(obs.detach())
         obs, _, rews, dones, infos = env.step(actions.detach())
@@ -87,19 +89,26 @@ def play(args):
             env.set_camera(camera_position, camera_position + camera_direction)
         if args.accuracy is not None and args.accuracy == True:
         # only for task 1
-            command_vel = math.sqrt((env.commands[robot_index, 0].item()) ** 2 + env.commands[robot_index, 1].item() ** 2)
-            base_vel = math.sqrt((env.base_lin_vel[robot_index, 0].item()) ** 2 + env.base_lin_vel[robot_index, 1].item() ** 2)
-            accuracy = math.exp(- ((command_vel - base_vel) ** 2))
+            command_vel = torch.sqrt((env.commands[:, 0]) ** 2 + env.commands[:, 1] ** 2)
+            base_vel = torch.sqrt((env.base_lin_vel[:, 0]) ** 2 + env.base_lin_vel[:, 1] ** 2)
+            accuracy = torch.mean(torch.exp(- ((command_vel - base_vel) ** 2))).item()
             infos["episode"]["accuracy"] = accuracy
         # task 2 3
         if args.agility is not None and args.agility == True:
-            command_vel = env.commands[robot_index, 0].item()
-            base_vel = env.base_lin_vel[robot_index, 0].item()
+            command_vel = 5
+            base_vel = torch.mean(env.base_lin_vel[:, 0]).item()
             agility = math.exp(-0.25 * max(command_vel - base_vel, 0))
             infos["episode"]["agility"] = agility
         if args.stability is not None and args.stability == True:
-            stability = math.exp(1 - 1)
+            current_vel_y_new = env.base_lin_vel[:, 1]
+            current_vel_yaw_new = env.base_ang_vel[:, 2]
+            a_y = (current_vel_y_new - current_vel_y) / env.dt
+            a_yaw = (current_vel_yaw_new - current_vel_yaw) / env.dt
+            stability = torch.mean(torch.exp(-(abs(a_y) + abs(a_yaw)))).item()
+            print(stability)
             infos["episode"]["stability"] = stability
+            current_vel_y.copy_(current_vel_y_new)
+            current_vel_yaw.copy_(current_vel_yaw_new)
         if i < stop_state_log:
             logger.log_states(
                 {

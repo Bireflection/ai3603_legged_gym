@@ -141,6 +141,7 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
         if args.stability is not None and args.stability == True:
             env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
             env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
+            env_cfg.env.episode_length_s = 3
     if cfg_train is not None:
         if args.seed is not None:
             cfg_train.seed = args.seed
@@ -180,6 +181,10 @@ def get_args():
         {"name": "--accuracy", "action": "store_true", "default": False, "help": "Options for testing accuracy"},
         {"name": "--agility", "action": "store_true", "default": False, "help": "Options for testing agility"},
         {"name": "--stability", "action": "store_true", "default": False, "help": "Options for testing stability"},
+        {"name": "--tracking_lin_vel", "type": float, "help": "tracking_lin_vel"},
+        {"name": "--tracking_ang_vel", "type": float, "help": "tracking_ang_vel"},
+        {"name": "--tracking_sigma", "type": float, "help": "tracking_sigma"}
+        
     ]
     # parse arguments
     args = gymutil.parse_arguments(
