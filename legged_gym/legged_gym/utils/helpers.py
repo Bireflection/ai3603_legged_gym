@@ -135,7 +135,7 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
             env_cfg.commands.ranges.lin_vel_y = [-1.0, 1.0]
             env_cfg.env.episode_length_s = 3
         if args.agility is not None and args.agility == True:
-            env_cfg.commands.ranges.lin_vel_x = [5.0, 5.0]
+            env_cfg.commands.ranges.lin_vel_x = [3.0, 3.0]
             env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
             env_cfg.env.episode_length_s = 1
         if args.stability is not None and args.stability == True:
@@ -183,6 +183,8 @@ def get_args():
         {"name": "--stability", "action": "store_true", "default": False, "help": "Options for testing stability"},
         {"name": "--tracking_lin_vel", "type": float, "help": "tracking_lin_vel"},
         {"name": "--tracking_ang_vel", "type": float, "help": "tracking_ang_vel"},
+        {"name": "--tracking_x_vel", "type": float, "help": "tracking_x_vel"},
+        {"name": "--tracking_y_vel", "type": float, "help": "tracking_y_vel"},
         {"name": "--tracking_sigma", "type": float, "help": "tracking_sigma"}
         
     ]

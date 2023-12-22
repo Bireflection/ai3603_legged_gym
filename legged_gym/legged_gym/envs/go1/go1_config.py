@@ -32,7 +32,7 @@ from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobot
 
 class GO1RoughCfg( LeggedRobotCfg ):
     class init_state( LeggedRobotCfg.init_state ):
-        pos = [0.0, 0.0, 0.42] # x,y,z [m]
+        pos = [0.0, 0.0, 0.34] # x,y,z [m]
         default_joint_angles = { # = target angles [rad] when action = 0.0
             'FL_hip_joint': 0.1,   # [rad]
             'RL_hip_joint': 0.1,   # [rad]
@@ -76,15 +76,23 @@ class GO1RoughCfg( LeggedRobotCfg ):
         base_height_target = 0.25
         tracking_sigma = 0.25  # 减小以提高准确性
         class scales( LeggedRobotCfg.rewards.scales ):
+            # tracking_lin_vel = 1.5  # 增加以提高准确性和敏捷性
+            # tracking_ang_vel = 0.75  # 增加以提高准确性
             tracking_lin_vel = 2.0  # 增加以提高准确性和敏捷性
             tracking_ang_vel = 0.9  # 增加以提高准确性
+            tracking_x_vel = 1.0
+            tracking_y_vel = 1.0
+            # tracking_x_acc = 1.0
             lin_vel_z = -4  # 减少以提高稳定性
-            ang_vel_xy = -0.025  # 减少以提高稳定性
+            ang_vel_xy = -0.1  # 减少以提高稳定性
             orientation = -0.5  # 增加以提高稳定性
             torques = -2.5e-5
             dof_acc = -1.25e-7
-            # feet_air_time = 
+            feet_air_time = 1.5
             dof_pos_limits = -10.0
+    class commands( LeggedRobotCfg.commands ):
+        class ranges( LeggedRobotCfg.commands.ranges ):
+            lin_vel_x = [-1.0, 3.0] # min max [m/s]
 
 class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
     class policy( LeggedRobotCfgPPO.policy ):
@@ -98,6 +106,4 @@ class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
         # policy_class_name = 'ActorCriticRecurrent'
         run_name = ''
         experiment_name = 'go1'
-        # max_iterations = 5000
-
-  
+        max_iterations = 5000

@@ -116,6 +116,8 @@ class LeggedRobot(BaseTask):
         # prepare quantities
         self.base_quat[:] = self.root_states[:, 3:7]
         self.base_lin_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
+        self.last_x_vel = self.x_vel
+        self.x_vel = self.base_lin_vel[:, 0]
         self.base_ang_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity[:] = quat_rotate_inverse(self.base_quat, self.gravity_vec)
 
@@ -130,6 +132,7 @@ class LeggedRobot(BaseTask):
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
+        self.last_x_vel[:] = self.x_vel[:]
         self.last_root_vel[:] = self.root_states[:, 7:13]
 
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
@@ -170,6 +173,7 @@ class LeggedRobot(BaseTask):
         # reset buffers
         self.last_actions[env_ids] = 0.
         self.last_dof_vel[env_ids] = 0.
+        self.last_x_vel[env_ids] = 0.
         self.feet_air_time[env_ids] = 0.
         self.episode_length_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
@@ -518,6 +522,8 @@ class LeggedRobot(BaseTask):
         self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
+        self.x_vel = self.base_lin_vel[:, 0]
+        self.last_x_vel = torch.zeros_like(self.x_vel)
         if self.cfg.terrain.measure_heights:
             self.height_points = self._init_height_points()
         self.measured_heights = 0
@@ -902,8 +908,17 @@ class LeggedRobot(BaseTask):
         return torch.sum(torch.abs(self.dof_pos - self.default_dof_pos), dim=1) * (torch.norm(self.commands[:, :2], dim=1) < 0.1)
 
     def _reward_feet_contact_forces(self):
-        # penalize high contact forces
+        # penalize high contact Strack F, Deutsch R. Reflective and impulsive determinants of consumer behavior[J]. Journal of Consumer Psychology, 2006, 16(3): 205-216.
         return torch.sum((torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1) -  self.cfg.rewards.max_contact_force).clip(min=0.), dim=1)
+# abs ?
+    def _reward_tracking_x_vel(self):
+        lin_vel_error = torch.abs(torch.mean(torch.square(self.commands[:, 0] - self.base_lin_vel[:, 0])))
+        # return torch.exp(-lin_vel_error/self.cfg.rewards.tracking_sigma)
+        return torch.exp(-lin_vel_error)
 
-    # def _reward_acceleration_command_towards(self):
-    #     if self.command(self.commands[:, :2])
+    def _reward_tracking_y_vel(self):
+        lin_vel_error = torch.abs(torch.mean(torch.square(self.commands[:, 1] - self.base_lin_vel[:, 1])))
+        return torch.exp(-lin_vel_error)
+
+    # def _reward_tracking_x_acc(self):
+    #     return torch.sum(torch.square((self.last_x_vel - self.x_vel) / self.dt), dim=0)

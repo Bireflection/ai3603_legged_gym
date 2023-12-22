@@ -49,7 +49,9 @@ def play(args):
     env_cfg.noise.add_noise = False
     env_cfg.domain_rand.randomize_friction = False
     env_cfg.domain_rand.push_robots = False
-
+    if args.agility is not None and args.agility == True:
+        # lowered mesh
+        env_cfg.terrain.mesh_type = "plane"
     # prepare environment
     env, _ = task_registry.make_env(name=args.task, args=args, env_cfg=env_cfg)
     obs = env.get_observations()
@@ -76,6 +78,9 @@ def play(args):
 
     current_vel_y = torch.zeros(env_cfg.env.num_envs,device="cuda:0")
     current_vel_yaw = torch.zeros(env_cfg.env.num_envs,device="cuda:0")
+    accuracy = 0
+    agility = 0
+    stability = 0
     for i in range(10*int(env.max_episode_length)):
         actions = policy(obs.detach())
         obs, _, rews, dones, infos = env.step(actions.detach())
@@ -92,23 +97,23 @@ def play(args):
             command_vel = torch.sqrt((env.commands[:, 0]) ** 2 + env.commands[:, 1] ** 2)
             base_vel = torch.sqrt((env.base_lin_vel[:, 0]) ** 2 + env.base_lin_vel[:, 1] ** 2)
             accuracy = torch.mean(torch.exp(- ((command_vel - base_vel) ** 2))).item()
-            infos["episode"]["accuracy"] = accuracy
-        # task 2 3
+
+        # task 2
         if args.agility is not None and args.agility == True:
-            command_vel = 5
-            base_vel = torch.mean(env.base_lin_vel[:, 0]).item()
+            command_vel = 3 # lowered
+            base_vel = env.base_lin_vel[robot_index, 0].item()
             agility = math.exp(-0.25 * max(command_vel - base_vel, 0))
-            infos["episode"]["agility"] = agility
+
+        # task 3 error occurs
         if args.stability is not None and args.stability == True:
             current_vel_y_new = env.base_lin_vel[:, 1]
             current_vel_yaw_new = env.base_ang_vel[:, 2]
             a_y = (current_vel_y_new - current_vel_y) / env.dt
             a_yaw = (current_vel_yaw_new - current_vel_yaw) / env.dt
             stability = torch.mean(torch.exp(-(abs(a_y) + abs(a_yaw)))).item()
-            print(stability)
-            infos["episode"]["stability"] = stability
             current_vel_y.copy_(current_vel_y_new)
             current_vel_yaw.copy_(current_vel_yaw_new)
+
         if i < stop_state_log:
             logger.log_states(
                 {
@@ -123,7 +128,10 @@ def play(args):
                     'base_vel_y': env.base_lin_vel[robot_index, 1].item(),
                     'base_vel_z': env.base_lin_vel[robot_index, 2].item(),
                     'base_vel_yaw': env.base_ang_vel[robot_index, 2].item(),
-                    'contact_forces_z': env.contact_forces[robot_index, env.feet_indices, 2].cpu().numpy()
+                    'contact_forces_z': env.contact_forces[robot_index, env.feet_indices, 2].cpu().numpy(),
+                    'accuracy':accuracy,
+                    'agility':agility,
+                    'stability':stability
                 }
             )
         elif i==stop_state_log:

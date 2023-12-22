@@ -67,6 +67,10 @@ class TaskRegistry():
             env_cfg.rewards.scales.tracking_lin_vel = args.tracking_lin_vel
         if args.tracking_ang_vel is not None:
             env_cfg.rewards.scales.tracking_ang_vel = args.tracking_ang_vel
+        if args.tracking_x_vel is not None:
+            env_cfg.rewards.scales.tracking_x_vel = args.tracking_x_vel
+        if args.tracking_y_vel is not None:
+            env_cfg.rewards.scales.tracking_y_vel = args.tracking_y_vel
         if args.tracking_sigma is not None:
             env_cfg.rewards.tracking_sigma = args.tracking_sigma
 
@@ -142,7 +146,7 @@ class TaskRegistry():
             if name is not None:
                 print(f"'train_cfg' provided -> Ignoring 'name={name}'")
         # override cfg from args (if specified)
-        _, train_cfg = update_cfg_from_args(None, train_cfg, args)
+        env_cfg, train_cfg = update_cfg_from_args(None, train_cfg, args)
 
         
 
@@ -160,6 +164,18 @@ class TaskRegistry():
             with open(log_file, "w") as f:
                 for key, value in vars(args).items():
                     f.write(f"{key}: {value}\n")
+                f.write("tracking_lin_vel" + ":" + env_cfg.rewards.scales.tracking_lin_vel + "\n")
+                f.write("tracking_ang_vel" + ":" + env_cfg.rewards.scales.tracking_ang_vel + "\n")
+                f.write("tracking_x_vel" + ":" + env_cfg.rewards.scales.tracking_x_vel + "\n")
+                f.write("tracking_y_vel" + ":" + env_cfg.rewards.scales.tracking_y_vel + "\n")
+                f.write("lin_vel_z" + ":" + env_cfg.rewards.scales.lin_vel_z + "\n")
+                f.write("ang_vel_xy" + ":" + env_cfg.rewards.scales.ang_vel_xy + "\n")
+                f.write("orientation" + ":" + env_cfg.rewards.scales.orientation + "\n")
+                f.write("feet_air_time" + ":" + env_cfg.rewards.scales.feet_air_time + "\n")
+                f.write("entropy_coef" + ":" + train_cfg.algorithm.entropy_coef + "\n")
+                f.write("learning_rate" + ":" + train_cfg.algorithm.learning_rate + "\n")
+
+                
 
         train_cfg_dict = class_to_dict(train_cfg)
         runner = OnPolicyRunner(env, train_cfg_dict, log_dir, device=args.rl_device)
