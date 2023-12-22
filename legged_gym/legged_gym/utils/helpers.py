@@ -136,16 +136,40 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
             env_cfg.env.episode_length_s = 3
         if args.agility is not None and args.agility == True:
             env_cfg.commands.ranges.lin_vel_x = [3.0, 3.0]
-            env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
+            env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0] # float 
             env_cfg.env.episode_length_s = 1
         if args.stability is not None and args.stability == True:
             env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
-            env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0]
+            env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0] # float 
             env_cfg.env.episode_length_s = 3
+        if args.tracking_lin_vel is not None:
+            env_cfg.rewards.scales.tracking_lin_vel = args.tracking_lin_vel
+        if args.tracking_ang_vel is not None:
+            env_cfg.rewards.scales.tracking_ang_vel = args.tracking_ang_vel
+        if args.tracking_x_vel is not None:
+            env_cfg.rewards.scales.tracking_x_vel = args.tracking_x_vel
+        if args.tracking_y_vel is not None:
+            env_cfg.rewards.scales.tracking_y_vel = args.tracking_y_vel
+        if args.feet_air_time is not None:
+            env_cfg.rewards.feet_air_time = args.feet_air_time
+        if args.lin_vel_z is not None:
+            env_cfg.rewards.lin_vel_z = args.lin_vel_z
+
     if cfg_train is not None:
         if args.seed is not None:
             cfg_train.seed = args.seed
         # alg runner parameters
+            
+        if args.lam is not None:
+            cfg_train.algorithm.lam = args.lam
+        if args.gamma is not None:
+            cfg_train.algorithm.gamma = args.gamma
+        if args.entropy_coef is not None:
+            cfg_train.algorithm.entropy_coef = args.entropy_coef     
+        if args.lr is not None:
+            cfg_train.algorithm.learning_rate = args.lr    
+
+              
         if args.max_iterations is not None:
             cfg_train.runner.max_iterations = args.max_iterations
         if args.resume:
@@ -185,7 +209,12 @@ def get_args():
         {"name": "--tracking_ang_vel", "type": float, "help": "tracking_ang_vel"},
         {"name": "--tracking_x_vel", "type": float, "help": "tracking_x_vel"},
         {"name": "--tracking_y_vel", "type": float, "help": "tracking_y_vel"},
-        {"name": "--tracking_sigma", "type": float, "help": "tracking_sigma"}
+        {"name": "--lr", "type": float, "help": "learning rate"},
+        {"name": "--lam", "type": float, "help": "lam"},
+        {"name": "--gamma", "type": float, "help": "gamma"},
+        {"name": "--entropy_coef", "type": float, "help": "entropy_coef"},
+        {"name": "--feet_air_time", "type": float, "help": "feet_air_time"},
+        {"name": "--lin_vel_z", "type": float, "help": "lin_vel_z"}
         
     ]
     # parse arguments

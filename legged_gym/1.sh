@@ -18,18 +18,18 @@ echo "开始运行脚本..."
 #     python ./legged_gym/scripts/train.py --task=go1 --num_envs=1024 --headless --tracking_ang_vel=$value
 # done
 
-for value in $(seq 0.1 0.1 1)
+for value in $(seq 0.0001 0.0001 0.001)
 do
     # 执行 Python 脚本，带有不同的 tracking_lin_vel 参数
-    echo "运行 train.py with tracking_x_vel=$value"
-    python ./legged_gym/scripts/train.py --task=go1 --num_envs=1024 --headless --tracking_x_vel=$value
+    echo "运行 train.py with lr=$value"
+    python ./legged_gym/scripts/train.py --task=go1 --num_envs=1024 --headless --lr=$value
 done
-for value in $(seq 0.1 0.1 1)
-do
-    # 执行 Python 脚本，带有不同的 tracking_lin_vel 参数
-    echo "运行 train.py with tracking_y_vel=$value"
-    python ./legged_gym/scripts/train.py --task=go1 --num_envs=1024 --headless --tracking_y_vel=$value
-done
+# for value in $(seq 0.1 0.1 1)
+# do
+#     # 执行 Python 脚本，带有不同的 tracking_lin_vel 参数
+#     echo "运行 train.py with tracking_y_vel=$value"
+#     python ./legged_gym/scripts/train.py --task=go1 --num_envs=1024 --headless --tracking_y_vel=$value
+# done
 # for value in $(seq 0.05 0.05 0.3)
 # do
 #     # 执行 Python 脚本，带有不同的 tracking_lin_vel 参数

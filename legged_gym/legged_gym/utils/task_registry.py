@@ -62,17 +62,6 @@ class TaskRegistry():
         env_cfg.seed = train_cfg.seed
         return env_cfg, train_cfg
     
-    def update_scale(self, env_cfg, args):
-        if args.tracking_lin_vel is not None:
-            env_cfg.rewards.scales.tracking_lin_vel = args.tracking_lin_vel
-        if args.tracking_ang_vel is not None:
-            env_cfg.rewards.scales.tracking_ang_vel = args.tracking_ang_vel
-        if args.tracking_x_vel is not None:
-            env_cfg.rewards.scales.tracking_x_vel = args.tracking_x_vel
-        if args.tracking_y_vel is not None:
-            env_cfg.rewards.scales.tracking_y_vel = args.tracking_y_vel
-        if args.tracking_sigma is not None:
-            env_cfg.rewards.tracking_sigma = args.tracking_sigma
 
     def make_env(self, name, args=None, env_cfg=None) -> Tuple[VecEnv, LeggedRobotCfg]:
         """ Creates an environment either from a registered namme or from the provided config file.
@@ -102,7 +91,6 @@ class TaskRegistry():
             env_cfg, _ = self.get_cfgs(name)
         # override cfg from args (if specified)
         env_cfg, _ = update_cfg_from_args(env_cfg, None, args)
-        self.update_scale(env_cfg=env_cfg,args=args)
         set_seed(env_cfg.seed)
         # parse sim params (convert to dict first)
         sim_params = {"sim": class_to_dict(env_cfg.sim)}
@@ -114,7 +102,7 @@ class TaskRegistry():
                             headless=args.headless)
         return env, env_cfg
 
-    def make_alg_runner(self, env, name=None, args=None, train_cfg=None, log_root="default") -> Tuple[OnPolicyRunner, LeggedRobotCfgPPO]:
+    def make_alg_runner(self, env, name=None, args=None, train_cfg=None, log_root="default", env_cfg=None) -> Tuple[OnPolicyRunner, LeggedRobotCfgPPO]:
         """ Creates the training algorithm  either from a registered namme or from the provided config file.
 
         Args:
@@ -146,10 +134,8 @@ class TaskRegistry():
             if name is not None:
                 print(f"'train_cfg' provided -> Ignoring 'name={name}'")
         # override cfg from args (if specified)
-        env_cfg, train_cfg = update_cfg_from_args(None, train_cfg, args)
-
+        _, train_cfg = update_cfg_from_args(None, train_cfg, args)
         
-
         if log_root=="default":
             log_root = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name)
             log_dir = os.path.join(log_root, datetime.now().strftime('%b%d_%H-%M-%S') + '_' + train_cfg.runner.run_name)
@@ -164,16 +150,16 @@ class TaskRegistry():
             with open(log_file, "w") as f:
                 for key, value in vars(args).items():
                     f.write(f"{key}: {value}\n")
-                f.write("tracking_lin_vel" + ":" + env_cfg.rewards.scales.tracking_lin_vel + "\n")
-                f.write("tracking_ang_vel" + ":" + env_cfg.rewards.scales.tracking_ang_vel + "\n")
-                f.write("tracking_x_vel" + ":" + env_cfg.rewards.scales.tracking_x_vel + "\n")
-                f.write("tracking_y_vel" + ":" + env_cfg.rewards.scales.tracking_y_vel + "\n")
-                f.write("lin_vel_z" + ":" + env_cfg.rewards.scales.lin_vel_z + "\n")
-                f.write("ang_vel_xy" + ":" + env_cfg.rewards.scales.ang_vel_xy + "\n")
-                f.write("orientation" + ":" + env_cfg.rewards.scales.orientation + "\n")
-                f.write("feet_air_time" + ":" + env_cfg.rewards.scales.feet_air_time + "\n")
-                f.write("entropy_coef" + ":" + train_cfg.algorithm.entropy_coef + "\n")
-                f.write("learning_rate" + ":" + train_cfg.algorithm.learning_rate + "\n")
+                f.write("tracking_lin_vel" + ":" + f"{env_cfg.rewards.scales.tracking_lin_vel}" + "\n")
+                f.write("tracking_ang_vel" + ":" + f"{env_cfg.rewards.scales.tracking_ang_vel}" + "\n")
+                f.write("tracking_x_vel" + ":" + f"{env_cfg.rewards.scales.tracking_x_vel}" + "\n")
+                f.write("tracking_y_vel" + ":" + f"{env_cfg.rewards.scales.tracking_y_vel}" + "\n")
+                f.write("lin_vel_z" + ":" + f"{env_cfg.rewards.scales.lin_vel_z}" + "\n")
+                f.write("ang_vel_xy" + ":" + f"{env_cfg.rewards.scales.ang_vel_xy}" + "\n")
+                f.write("orientation" + ":" + f"{env_cfg.rewards.scales.orientation}" + "\n")
+                f.write("feet_air_time" + ":" + f"{env_cfg.rewards.scales.feet_air_time}" + "\n")
+                f.write("entropy_coef" + ":" + f"{train_cfg.algorithm.entropy_coef}" + "\n")
+                f.write("learning_rate" + ":" + f"{train_cfg.algorithm.learning_rate}" + "\n")
 
                 
 
