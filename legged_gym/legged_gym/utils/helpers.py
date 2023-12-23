@@ -137,10 +137,12 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
         if args.agility is not None and args.agility == True:
             env_cfg.commands.ranges.lin_vel_x = [3.0, 3.0]
             env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0] # float 
+            env_cfg.commands.ranges.heading = [0.0, 0.0]
             env_cfg.env.episode_length_s = 1
         if args.stability is not None and args.stability == True:
             env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
             env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0] # float 
+            env_cfg.commands.ranges.heading = [0.0, 0.0]
             env_cfg.env.episode_length_s = 3
         if args.tracking_lin_vel is not None:
             env_cfg.rewards.scales.tracking_lin_vel = args.tracking_lin_vel

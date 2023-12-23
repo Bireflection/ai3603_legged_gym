@@ -84,7 +84,7 @@ class GO1RoughCfg( LeggedRobotCfg ):
             tracking_y_vel = 1.0
             # tracking_x_acc = 1.0
             lin_vel_z = -4  # 减少以提高稳定性
-            ang_vel_xy = -0.1  # 减少以提高稳定性
+            ang_vel_xy = -0.025  # 减少以提高稳定性
             orientation = -0.5  # 增加以提高稳定性
             torques = -2.5e-5
             dof_acc = -1.25e-7
