@@ -230,7 +230,7 @@ class LeggedRobot(BaseTask):
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
 
     def create_sim(self):
-        """ Creates simulation, terrain and evironments
+        """ Creates simulation, terrain and environments
         """
         self.up_axis_idx = 2 # 2 for z, 1 for y -> adapt gravity accordingly
         self.sim = self.gym.create_sim(self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
@@ -826,6 +826,10 @@ class LeggedRobot(BaseTask):
     def _reward_ang_vel_xy(self):
         # Penalize xy axes base angular velocity
         return torch.sum(torch.square(self.base_ang_vel[:, :2]), dim=1)
+    
+    def _reward_yaw(self):
+        # Penalize yaw away from command 
+        return torch.exp(-torch.abs(torch.mean(torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2]))))
     
     def _reward_orientation(self):
         # Penalize non flat base orientation

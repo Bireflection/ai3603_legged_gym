@@ -101,7 +101,7 @@ def play(args):
         # task 2
         if args.agility is not None and args.agility == True:
             command_vel = 3 # lowered
-            base_vel = env.base_lin_vel[robot_index, 0].item()
+            base_vel = torch.mean(env.base_lin_vel[:, 0])
             agility = math.exp(-0.25 * max(command_vel - base_vel, 0))
 
         # task 3 error occurs

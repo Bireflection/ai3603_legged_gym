@@ -143,7 +143,9 @@ def update_cfg_from_args(env_cfg, cfg_train, args):
             env_cfg.commands.ranges.lin_vel_x = [-1.0, 1.0]
             env_cfg.commands.ranges.lin_vel_y = [0.0, 0.0] # float 
             env_cfg.commands.ranges.heading = [0.0, 0.0]
-            env_cfg.env.episode_length_s = 3
+            # env_cfg.commands.ranges.ang_vel_yaw = [0, 0] 
+            # env_cfg.commands.ranges.heading_command = False
+            env_cfg.env.episode_length_s = 1
         if args.tracking_lin_vel is not None:
             env_cfg.rewards.scales.tracking_lin_vel = args.tracking_lin_vel
         if args.tracking_ang_vel is not None:

@@ -80,19 +80,22 @@ class GO1RoughCfg( LeggedRobotCfg ):
             # tracking_ang_vel = 0.75  # 增加以提高准确性
             tracking_lin_vel = 2.0  # 增加以提高准确性和敏捷性
             tracking_ang_vel = 0.9  # 增加以提高准确性
-            tracking_x_vel = 1.0
+            tracking_x_vel = 5.0
             tracking_y_vel = 1.0
+            yaw = 1.0
             # tracking_x_acc = 1.0
             lin_vel_z = -4  # 减少以提高稳定性
             ang_vel_xy = -0.025  # 减少以提高稳定性
             orientation = -0.5  # 增加以提高稳定性
             torques = -2.5e-5
             dof_acc = -1.25e-7
-            feet_air_time = 1.5
+            feet_air_time = 1.0
             dof_pos_limits = -10.0
     class commands( LeggedRobotCfg.commands ):
+        curriculum = True
+        max_curriculum = 4
         class ranges( LeggedRobotCfg.commands.ranges ):
-            lin_vel_x = [-1.0, 3.0] # min max [m/s]
+            lin_vel_x = [-1.0, 1.0] # min max [m/s]
 
 class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
     class policy( LeggedRobotCfgPPO.policy ):
@@ -102,6 +105,8 @@ class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
         # rnn_num_layers = 1
     class algorithm( LeggedRobotCfgPPO.algorithm ):
         entropy_coef = 0.01
+        learning_rate = 1.e-3
+        lam = 0.97
     class runner( LeggedRobotCfgPPO.runner ):
         # policy_class_name = 'ActorCriticRecurrent'
         run_name = ''
