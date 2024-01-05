@@ -53,6 +53,7 @@ Thumbs.db
 # logs
 logs
 logs_history
+logs_important
 runs
 Backup
 

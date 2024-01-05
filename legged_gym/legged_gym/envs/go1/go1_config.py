@@ -78,12 +78,17 @@ class GO1RoughCfg( LeggedRobotCfg ):
         class scales( LeggedRobotCfg.rewards.scales ):
             # tracking_lin_vel = 1.5  # 增加以提高准确性和敏捷性
             # tracking_ang_vel = 0.75  # 增加以提高准确性
-            tracking_lin_vel = 2.0  # 增加以提高准确性和敏捷性
+            # tracking_lin_vel = 2.0  # 增加以提高准确性和敏捷性 finetune 1234
+            tracking_lin_vel = 3.0  # 增加以提高准确性和敏捷性 finetune 56
             tracking_ang_vel = 0.9  # 增加以提高准确性
             tracking_x_vel = 5.0
-            tracking_y_vel = 1.0
+            # tracking_y_vel = 1.0 base finetune1
+            # tracking_y_vel = 2.0 # finetune 2
+            tracking_y_vel = 3.0 # finetune 3 4 5
             yaw = 1.0
-            # tracking_x_acc = 1.0
+            # clip_y = 1000.0 # finetune 7clip
+            # tracking_x_acc = 1.0 
+            stable_acc = 1.0 # finetune4
             lin_vel_z = -4  # 减少以提高稳定性
             ang_vel_xy = -0.025  # 减少以提高稳定性
             orientation = -0.5  # 增加以提高稳定性
@@ -92,11 +97,14 @@ class GO1RoughCfg( LeggedRobotCfg ):
             feet_air_time = 1.0
             dof_pos_limits = -10.0
     class commands( LeggedRobotCfg.commands ):
-        curriculum = True
-        max_curriculum = 4
+        curriculum = False
         class ranges( LeggedRobotCfg.commands.ranges ):
-            lin_vel_x = [-1.0, 1.0] # min max [m/s]
-
+            # lin_vel_x = [-1.0, 2.0] # min max [m/s] base
+            lin_vel_x = [-1.0, 3.0] # min max [m/s] finetune1235 7 normal
+            # lin_vel_x = [-1.0, 1.0] # min max [m/s] finetune467clip
+            # lin_vel_y = [0.0, 0.0] # min max [m/s] finetune467clip
+    # class terrain( LeggedRobotCfg.terrain ):
+    #     mesh_type = 'plane' # "heightfield" # none, plane, heightfield or trimeshfinetune2
 class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
     class policy( LeggedRobotCfgPPO.policy ):
         activation = 'elu'
@@ -105,10 +113,13 @@ class GO1RoughCfgPPO( LeggedRobotCfgPPO ):
         # rnn_num_layers = 1
     class algorithm( LeggedRobotCfgPPO.algorithm ):
         entropy_coef = 0.01
-        learning_rate = 1.e-3
+        # learning_rate = 1.e-3 base finetune1
+        learning_rate = 1.e-4 # finetune2
         lam = 0.97
     class runner( LeggedRobotCfgPPO.runner ):
         # policy_class_name = 'ActorCriticRecurrent'
         run_name = ''
         experiment_name = 'go1'
-        max_iterations = 5000
+        # max_iterations = 5000
+        max_iterations = 10000
+

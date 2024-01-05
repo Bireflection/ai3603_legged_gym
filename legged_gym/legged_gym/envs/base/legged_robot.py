@@ -48,6 +48,7 @@ from legged_gym.utils.math import quat_apply_yaw, wrap_to_pi, torch_rand_sqrt_fl
 from legged_gym.utils.helpers import class_to_dict
 from .legged_robot_config import LeggedRobotCfg
 
+import math
 class LeggedRobot(BaseTask):
     def __init__(self, cfg: LeggedRobotCfg, sim_params, physics_engine, sim_device, headless):
         """ Parses the provided config file,
@@ -116,8 +117,10 @@ class LeggedRobot(BaseTask):
         # prepare quantities
         self.base_quat[:] = self.root_states[:, 3:7]
         self.base_lin_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 7:10])
-        self.last_x_vel = self.x_vel
         self.x_vel = self.base_lin_vel[:, 0]
+        self.y_vel = self.base_lin_vel[:, 1]
+        self.yaw_vel = self.base_lin_vel[:, 2]
+
         self.base_ang_vel[:] = quat_rotate_inverse(self.base_quat, self.root_states[:, 10:13])
         self.projected_gravity[:] = quat_rotate_inverse(self.base_quat, self.gravity_vec)
 
@@ -133,6 +136,8 @@ class LeggedRobot(BaseTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
         self.last_x_vel[:] = self.x_vel[:]
+        self.last_y_vel[:] = self.y_vel[:]
+        self.last_yaw_vel[:] = self.yaw_vel[:]
         self.last_root_vel[:] = self.root_states[:, 7:13]
 
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
@@ -174,6 +179,8 @@ class LeggedRobot(BaseTask):
         self.last_actions[env_ids] = 0.
         self.last_dof_vel[env_ids] = 0.
         self.last_x_vel[env_ids] = 0.
+        self.last_y_vel[env_ids] = 0.
+        self.last_yaw_vel[env_ids] = 0.
         self.feet_air_time[env_ids] = 0.
         self.episode_length_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
@@ -453,7 +460,7 @@ class LeggedRobot(BaseTask):
         # If the tracking reward is above 80% of the maximum, increase the range of commands
         if torch.mean(self.episode_sums["tracking_lin_vel"][env_ids]) / self.max_episode_length > 0.8 * self.reward_scales["tracking_lin_vel"]:
             self.command_ranges["lin_vel_x"][0] = np.clip(self.command_ranges["lin_vel_x"][0] - 0.5, -self.cfg.commands.max_curriculum, 0.)
-            self.command_ranges["lin_vel_x"][1] = np.clip(self.command_ranges["lin_vel_x"][1] + 0.5, 0., self.cfg.commands.max_curriculum)
+            self.command_ranges["lin_vel_x"][1] = np.clip(self.command_ranges["l in_vel_x"][1] + 0.5, 0., self.cfg.commands.max_curriculum)
 
 
     def _get_noise_scale_vec(self, cfg):
@@ -524,6 +531,10 @@ class LeggedRobot(BaseTask):
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
         self.x_vel = self.base_lin_vel[:, 0]
         self.last_x_vel = torch.zeros_like(self.x_vel)
+        self.y_vel = self.base_lin_vel[:, 1]
+        self.last_y_vel = torch.zeros_like(self.y_vel)
+        self.yaw_vel = self.base_lin_vel[:, 2]
+        self.last_yaw_vel = torch.zeros_like(self.yaw_vel)
         if self.cfg.terrain.measure_heights:
             self.height_points = self._init_height_points()
         self.measured_heights = 0
@@ -926,3 +937,18 @@ class LeggedRobot(BaseTask):
 
     # def _reward_tracking_x_acc(self):
     #     return torch.sum(torch.square((self.last_x_vel - self.x_vel) / self.dt), dim=0)
+    def _reward_stable_acc(self):
+        # print(torch.abs(torch.mean(self.commands[:, 1])))
+        # exit(-1)
+        if torch.abs(torch.mean(self.commands[:, 1])) == 0:
+ 
+            return torch.mean(torch.exp(-torch.abs(self.last_yaw_vel - self.yaw_vel)/ self.dt))
+        # torch.exp(-torch.abs(torch.mean(torch.square(self.commands[:, 2] - self.base_ang_vel[:, 2]))))
+        else:
+            return 1
+    # def _reward_clip_y(self):
+    #     penalty_num = 0
+    #     for item in self.y_vel:
+    #         if abs(item) > 0.2:
+    #             penalty_num += 1 
+    #     return math.exp(-penalty_num)
