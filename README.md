@@ -21,4 +21,4 @@ python ./legged_gym/legged_gym/scripts/play.py --task=go1 --num_envs=num --type
 where `num` represents the number of environments, and `type` represents the task to evaluate, with `accuracy`, `agility` and `stability` to choose.
 
 ## Contribution
-Ke Chen completes the experiment in Parameter tuning，Curriculum learning and Actor Critic Recurrent Exploration. Mingxuan Li attempts to replace PPO with SAC.
+Ke Chen completes the experiment in Parameter Tuning, Curriculum Learning and Actor Critic Recurrent Exploration. Mingxuan Li attempts to replace PPO with SAC.
