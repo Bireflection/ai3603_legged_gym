@@ -7,7 +7,7 @@ This is the final project for AI3603 course of Shanghai Jiao Tong University.
 The lecturer of this course is Professor Yue Gao.
 
 ## Structure
-The final model is stored in `./legged_gym/legged_gym/logs/go1/Jan05_16-03-14_/35000.pt`. Other attempts are stored in `Previous Training` folder. Videos of training and evaluating is stored in `Video` folder. `Previous Training` folder is in [jbox]<https://stackoverflow.com>.
+The final model is stored in `./legged_gym/legged_gym/logs/go1/Jan05_16-03-14_/35000.pt`. Other attempts are stored in `Previous Training` folder. Videos of training and evaluating is stored in `Video` folder. `Previous Training` folder is in [jbox](https://stackoverflow.com).
 
 ## Usage
 You can simply run the `./legged_gym/legged_gym/test_acc.sh` or other scripts to test the outcome. 
