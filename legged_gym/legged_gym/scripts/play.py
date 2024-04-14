@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -33,11 +33,12 @@ import os
 
 import isaacgym
 from legged_gym.envs import *
-from legged_gym.utils import  get_args, export_policy_as_jit, task_registry, Logger
+from legged_gym.utils import get_args, export_policy_as_jit, task_registry, Logger
 
 import numpy as np
 import torch
 import math
+
 
 def play(args):
     env_cfg, train_cfg = task_registry.get_cfgs(name=args.task)
@@ -57,27 +58,31 @@ def play(args):
     obs = env.get_observations()
     # load policy
     train_cfg.runner.resume = True
-    ppo_runner, train_cfg = task_registry.make_alg_runner(env=env, name=args.task, args=args, train_cfg=train_cfg)
+    ppo_runner, train_cfg = task_registry.make_alg_runner(
+        env=env, name=args.task, args=args, train_cfg=train_cfg)
     policy = ppo_runner.get_inference_policy(device=env.device)
-    
+
     # export policy as a jit module (used to run it from C++)
     if EXPORT_POLICY:
-        path = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'policies')
+        path = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs',
+                            train_cfg.runner.experiment_name, 'exported', 'policies')
         export_policy_as_jit(ppo_runner.alg.actor_critic, path)
         print('Exported policy as jit script to: ', path)
 
     logger = Logger(env.dt)
-    robot_index = 0 # which robot is used for logging
-    joint_index = 1 # which joint is used for logging
-    stop_state_log = 100 # number of steps before plotting states
-    stop_rew_log = env.max_episode_length + 1 # number of steps before print average episode rewards
+    robot_index = 0  # which robot is used for logging
+    joint_index = 1  # which joint is used for logging
+    stop_state_log = 100  # number of steps before plotting states
+    # number of steps before print average episode rewards
+    stop_rew_log = env.max_episode_length + 1
     camera_position = np.array(env_cfg.viewer.pos, dtype=np.float64)
     camera_vel = np.array([1., 1., 0.])
-    camera_direction = np.array(env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
+    camera_direction = np.array(
+        env_cfg.viewer.lookat) - np.array(env_cfg.viewer.pos)
     img_idx = 0
 
-    current_vel_y = torch.zeros(env_cfg.env.num_envs,device="cuda:0")
-    current_vel_yaw = torch.zeros(env_cfg.env.num_envs,device="cuda:0")
+    current_vel_y = torch.zeros(env_cfg.env.num_envs, device="cuda:0")
+    current_vel_yaw = torch.zeros(env_cfg.env.num_envs, device="cuda:0")
     accuracy = 0
     agility = 0
     stability = 0
@@ -86,25 +91,29 @@ def play(args):
         obs, _, rews, dones, infos = env.step(actions.detach())
         if RECORD_FRAMES:
             if i % 2:
-                filename = os.path.join(LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'frames', f"{img_idx}.png")
+                filename = os.path.join(
+                    LEGGED_GYM_ROOT_DIR, 'logs', train_cfg.runner.experiment_name, 'exported', 'frames', f"{img_idx}.png")
                 env.gym.write_viewer_image_to_file(env.viewer, filename)
-                img_idx += 1 
+                img_idx += 1
         if MOVE_CAMERA:
             camera_position += camera_vel * env.dt
             env.set_camera(camera_position, camera_position + camera_direction)
         if args.accuracy is not None and args.accuracy == True:
-        # only for task 1
-            command_vel = torch.sqrt((env.commands[:, 0]) ** 2 + env.commands[:, 1] ** 2)
-            base_vel = torch.sqrt((env.base_lin_vel[:, 0]) ** 2 + env.base_lin_vel[:, 1] ** 2)
-            accuracy = torch.mean(torch.exp(- ((command_vel - base_vel) ** 2))).item()
+            # only for task 1
+            command_vel = torch.sqrt(
+                (env.commands[:, 0]) ** 2 + env.commands[:, 1] ** 2)
+            base_vel = torch.sqrt(
+                (env.base_lin_vel[:, 0]) ** 2 + env.base_lin_vel[:, 1] ** 2)
+            accuracy = torch.mean(
+                torch.exp(- ((command_vel - base_vel) ** 2))).item()
 
         # task 2
         if args.agility is not None and args.agility == True:
-            command_vel = 3 # lowered
+            command_vel = 3  # lowered
             base_vel = torch.mean(env.base_lin_vel[:, 0])
             agility = math.exp(-0.25 * max(command_vel - base_vel, 0))
 
-        # task 3 error occurs
+        # task 3
         if args.stability is not None and args.stability == True:
             current_vel_y_new = env.base_lin_vel[:, 1]
             current_vel_yaw_new = env.base_ang_vel[:, 2]
@@ -129,20 +138,21 @@ def play(args):
                     'base_vel_z': env.base_lin_vel[robot_index, 2].item(),
                     'base_vel_yaw': env.base_ang_vel[robot_index, 2].item(),
                     'contact_forces_z': env.contact_forces[robot_index, env.feet_indices, 2].cpu().numpy(),
-                    'accuracy':accuracy,
-                    'agility':agility,
-                    'stability':stability
+                    'accuracy': accuracy,
+                    'agility': agility,
+                    'stability': stability
                 }
             )
-        elif i==stop_state_log:
+        elif i == stop_state_log:
             logger.plot_states()
-        if  0 < i < stop_rew_log:
+        if 0 < i < stop_rew_log:
             if infos["episode"]:
                 num_episodes = torch.sum(env.reset_buf).item()
-                if num_episodes>0:
+                if num_episodes > 0:
                     logger.log_rewards(infos["episode"], num_episodes)
-        elif i==stop_rew_log:
+        elif i == stop_rew_log:
             logger.print_rewards()
+
 
 if __name__ == '__main__':
     EXPORT_POLICY = True

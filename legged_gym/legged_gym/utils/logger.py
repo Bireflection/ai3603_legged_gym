@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 from multiprocessing import Process, Value
+
 
 class Logger:
     def __init__(self, dt):
@@ -72,41 +73,57 @@ class Logger:
         for key, value in self.state_log.items():
             time = np.linspace(0, len(value)*self.dt, len(value))
             break
-        log= self.state_log
+        log = self.state_log
         # plot joint targets and measured positions
         a = axs[1, 0]
-        if log["dof_pos"]: a.plot(time, log["dof_pos"], label='measured')
-        if log["dof_pos_target"]: a.plot(time, log["dof_pos_target"], label='target')
+        if log["dof_pos"]:
+            a.plot(time, log["dof_pos"], label='measured')
+        if log["dof_pos_target"]:
+            a.plot(time, log["dof_pos_target"], label='target')
         a.set(xlabel='time [s]', ylabel='Position [rad]', title='DOF Position')
         a.legend()
         # plot joint velocity
         a = axs[1, 1]
-        if log["dof_vel"]: a.plot(time, log["dof_vel"], label='measured')
-        if log["dof_vel_target"]: a.plot(time, log["dof_vel_target"], label='target')
-        a.set(xlabel='time [s]', ylabel='Velocity [rad/s]', title='Joint Velocity')
+        if log["dof_vel"]:
+            a.plot(time, log["dof_vel"], label='measured')
+        if log["dof_vel_target"]:
+            a.plot(time, log["dof_vel_target"], label='target')
+        a.set(xlabel='time [s]', ylabel='Velocity [rad/s]',
+              title='Joint Velocity')
         a.legend()
         # plot base vel x
         a = axs[0, 0]
-        if log["base_vel_x"]: a.plot(time, log["base_vel_x"], label='measured')
-        if log["command_x"]: a.plot(time, log["command_x"], label='commanded')
-        a.set(xlabel='time [s]', ylabel='base lin vel [m/s]', title='Base velocity x')
+        if log["base_vel_x"]:
+            a.plot(time, log["base_vel_x"], label='measured')
+        if log["command_x"]:
+            a.plot(time, log["command_x"], label='commanded')
+        a.set(xlabel='time [s]', ylabel='base lin vel [m/s]',
+              title='Base velocity x')
         a.legend()
         # plot base vel y
         a = axs[0, 1]
-        if log["base_vel_y"]: a.plot(time, log["base_vel_y"], label='measured')
-        if log["command_y"]: a.plot(time, log["command_y"], label='commanded')
-        a.set(xlabel='time [s]', ylabel='base lin vel [m/s]', title='Base velocity y')
+        if log["base_vel_y"]:
+            a.plot(time, log["base_vel_y"], label='measured')
+        if log["command_y"]:
+            a.plot(time, log["command_y"], label='commanded')
+        a.set(xlabel='time [s]', ylabel='base lin vel [m/s]',
+              title='Base velocity y')
         a.legend()
         # plot base vel yaw
         a = axs[0, 2]
-        if log["base_vel_yaw"]: a.plot(time, log["base_vel_yaw"], label='measured')
-        if log["command_yaw"]: a.plot(time, log["command_yaw"], label='commanded')
-        a.set(xlabel='time [s]', ylabel='base ang vel [rad/s]', title='Base velocity yaw')
+        if log["base_vel_yaw"]:
+            a.plot(time, log["base_vel_yaw"], label='measured')
+        if log["command_yaw"]:
+            a.plot(time, log["command_yaw"], label='commanded')
+        a.set(xlabel='time [s]', ylabel='base ang vel [rad/s]',
+              title='Base velocity yaw')
         a.legend()
         # plot base vel z
         a = axs[1, 2]
-        if log["base_vel_z"]: a.plot(time, log["base_vel_z"], label='measured')
-        a.set(xlabel='time [s]', ylabel='base lin vel [m/s]', title='Base velocity z')
+        if log["base_vel_z"]:
+            a.plot(time, log["base_vel_z"], label='measured')
+        a.set(xlabel='time [s]', ylabel='base lin vel [m/s]',
+              title='Base velocity z')
         a.legend()
         # plot contact forces
         a = axs[2, 0]
@@ -114,62 +131,63 @@ class Logger:
             forces = np.array(log["contact_forces_z"])
             for i in range(forces.shape[1]):
                 a.plot(time, forces[:, i], label=f'force {i}')
-        a.set(xlabel='time [s]', ylabel='Forces z [N]', title='Vertical Contact forces')
+        a.set(xlabel='time [s]', ylabel='Forces z [N]',
+              title='Vertical Contact forces')
         a.legend()
         # plot torque/vel curves
         a = axs[2, 1]
-        if log["dof_vel"]!=[] and log["dof_torque"]!=[]: a.plot(log["dof_vel"], log["dof_torque"], 'x', label='measured')
-        a.set(xlabel='Joint vel [rad/s]', ylabel='Joint Torque [Nm]', title='Torque/velocity curves')
+        if log["dof_vel"] != [] and log["dof_torque"] != []:
+            a.plot(log["dof_vel"], log["dof_torque"], 'x', label='measured')
+        a.set(xlabel='Joint vel [rad/s]',
+              ylabel='Joint Torque [Nm]', title='Torque/velocity curves')
         a.legend()
         # plot torques
         a = axs[2, 2]
-        if log["dof_torque"]!=[]: a.plot(time, log["dof_torque"], label='measured')
+        if log["dof_torque"] != []:
+            a.plot(time, log["dof_torque"], label='measured')
         a.set(xlabel='time [s]', ylabel='Joint Torque [Nm]', title='Torque')
         a.legend()
 
         # plot accuracy
-        a = axs[3,0]
-        if log['accuracy'] != []: 
+        a = axs[3, 0]
+        if log['accuracy'] != []:
             log["accuracy"] = log["accuracy"][:200]
             mean_accuracy = sum(log["accuracy"])/len(log["accuracy"])
             mean_accuracy_list = [mean_accuracy] * len(log["accuracy"])
             a.plot(time[:200], log["accuracy"], label='current')
             a.plot(time[:200], mean_accuracy_list, label='mean')
             if mean_accuracy > 0.01:
-                with open("accuracy.txt", "w") as f:
+                with open("./result/accuracy.txt", "w") as f:
                     f.write("Accuracy: {}".format(mean_accuracy))
                 print("Accuracy: {}".format(mean_accuracy))
         a.set(xlabel='time [s]', ylabel='Accuracy', title='Accuracy')
         a.legend()
 
-
         # plot agility
-        a = axs[3,1]
-        if log['agility'] != []: 
-            log['agility'] = log['agility'][:200] # 2 second
+        a = axs[3, 1]
+        if log['agility'] != []:
+            log['agility'] = log['agility'][:200]  # 2 second
             mean_agility = sum(log["agility"])/len(log["agility"])
             mean_agility_list = [mean_agility] * len(log["agility"])
             a.plot(time[:200], log["agility"], label='current')
             a.plot(time[:200], mean_agility_list, label='mean')
             if mean_agility > 0.01:
-                with open("agility.txt", "w") as f:
+                with open("./result/agility.txt", "w") as f:
                     f.write("Agility: {}".format(mean_agility))
                 print("Agility: {}".format(mean_agility))
         a.set(xlabel='time [s]', ylabel='Agility', title='Agility')
         a.legend()
-        
-
 
         # plot stability
-        a = axs[3,2]
-        if log['stability'] != []: 
+        a = axs[3, 2]
+        if log['stability'] != []:
             log["stability"] = log["stability"][:200]
             mean_stability = sum(log["stability"])/len(log["stability"])
             mean_stability_list = [mean_stability] * len(log["stability"])
             a.plot(time[:200], log["stability"], label='current')
             a.plot(time[:200], mean_stability_list, label='mean')
             if mean_stability > 0.01:
-                with open("stability.txt", "w") as f:
+                with open("./result/stability.txt", "w") as f:
                     f.write("Stability: {}".format(mean_stability))
                 print("Stability: {}".format(mean_stability))
         a.set(xlabel='time [s]', ylabel='stability', title='stability')
@@ -183,7 +201,7 @@ class Logger:
             mean = np.sum(np.array(values)) / self.num_episodes
             print(f" - {key}: {mean}")
         print(f"Total number of episodes: {self.num_episodes}")
-    
+
     def __del__(self):
         if self.plot_process is not None:
             self.plot_process.kill()

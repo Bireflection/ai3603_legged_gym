@@ -15,7 +15,7 @@ You can simply run the `./legged_gym/legged_gym/test_acc.sh` or other scripts to
 Or you can use the following command to run:
 
 ```
-python ./legged_gym/legged_gym/scripts/play.py --task=go1 --num_envs=num --type
+python ./legged_gym/legged_gym/scripts/play.py --task=go1 --num_envs=num --type=type
 ```
 
 where `num` represents the number of environments, and `type` represents the task to evaluate, with `accuracy`, `agility` and `stability` to choose.
